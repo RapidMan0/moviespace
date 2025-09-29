@@ -18,7 +18,7 @@ import { WatchlistModule } from './modules/watchlist/watchlist.module';
       password: 'user228',
       database: 'examproga',
       autoLoadEntities: true,
-      synchronize: true, // Только для разработки!
+      synchronize: false, // Только для разработки!
     }),
     UsersModule,
     TitlesModule,
