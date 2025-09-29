@@ -1,41 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Episode } from './entities/episode.entity';
 import { CreateEpisodeDto } from './dto/create-episode.dto';
 import { UpdateEpisodeDto } from './dto/update-episode.dto';
-import { Episode } from './entities/episode.entity';
 
 @Injectable()
 export class EpisodesService {
-  private episodes: Episode[] = [];
-  private id = 1;
+  constructor(
+    @InjectRepository(Episode)
+    private episodesRepository: Repository<Episode>,
+  ) {}
 
-  create(createEpisodeDto: CreateEpisodeDto): Episode {
-    const episode: Episode = {
-      id: this.id++,
-      ...createEpisodeDto,
-    };
-    this.episodes.push(episode);
-    return episode;
+  async create(createEpisodeDto: CreateEpisodeDto): Promise<Episode> {
+    const episode = this.episodesRepository.create(createEpisodeDto);
+    return this.episodesRepository.save(episode);
   }
 
-  findAll(): Episode[] {
-    return this.episodes;
+  async findAll(): Promise<Episode[]> {
+    return this.episodesRepository.find();
   }
 
-  findOne(id: number): Episode | undefined {
-    return this.episodes.find(e => e.id === id);
+  async findOne(id: number): Promise<Episode | null> {
+    return this.episodesRepository.findOneBy({ id });
   }
 
-  update(id: number, updateEpisodeDto: UpdateEpisodeDto): Episode | undefined {
-    const episode = this.findOne(id);
-    if (!episode) return undefined;
-    Object.assign(episode, updateEpisodeDto);
-    return episode;
+  async update(id: number, updateEpisodeDto: UpdateEpisodeDto): Promise<Episode | null> {
+    await this.episodesRepository.update(id, updateEpisodeDto);
+    return this.findOne(id);
   }
 
-  remove(id: number): boolean {
-    const idx = this.episodes.findIndex(e => e.id === id);
-    if (idx === -1) return false;
-    this.episodes.splice(idx, 1);
-    return true;
+  async remove(id: number): Promise<boolean> {
+    const result = await this.episodesRepository.delete(id);
+    return result.affected === 1;
   }
 }

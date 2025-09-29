@@ -1,42 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Title } from './entities/title.entity';
 import { CreateTitleDto } from './dto/create-title.dto';
 import { UpdateTitleDto } from './dto/update-title.dto';
-import { Title } from './entities/title.entity';
 
 @Injectable()
 export class TitlesService {
-  private titles: Title[] = [];
-  private id = 1;
+  constructor(
+    @InjectRepository(Title)
+    private titlesRepository: Repository<Title>,
+  ) {}
 
-  create(createTitleDto: CreateTitleDto): Title {
-    const title: Title = {
-      id: this.id++,
+  async create(createTitleDto: CreateTitleDto): Promise<Title> {
+    const title = this.titlesRepository.create({
       ...createTitleDto,
       created_at: new Date(),
-    };
-    this.titles.push(title);
-    return title;
+    });
+    return this.titlesRepository.save(title);
   }
 
-  findAll(): Title[] {
-    return this.titles;
+  async findAll(): Promise<Title[]> {
+    return this.titlesRepository.find();
   }
 
-  findOne(id: number): Title | undefined {
-    return this.titles.find(t => t.id === id);
+  async findOne(id: number): Promise<Title | null> {
+    return this.titlesRepository.findOneBy({ id });
   }
 
-  update(id: number, updateTitleDto: UpdateTitleDto): Title | undefined {
-    const title = this.findOne(id);
-    if (!title) return undefined;
-    Object.assign(title, updateTitleDto);
-    return title;
+  async update(id: number, updateTitleDto: UpdateTitleDto): Promise<Title | null> {
+    await this.titlesRepository.update(id, updateTitleDto);
+    return this.findOne(id);
   }
 
-  remove(id: number): boolean {
-    const idx = this.titles.findIndex(t => t.id === id);
-    if (idx === -1) return false;
-    this.titles.splice(idx, 1);
-    return true;
+  async remove(id: number): Promise<boolean> {
+    const result = await this.titlesRepository.delete(id);
+    return result.affected === 1;
   }
 }

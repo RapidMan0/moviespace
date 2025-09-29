@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
@@ -8,7 +9,23 @@ import { RatingsModule } from './modules/ratings/ratings.module';
 import { WatchlistModule } from './modules/watchlist/watchlist.module';
 
 @Module({
-  imports: [UsersModule, TitlesModule, EpisodesModule, RatingsModule, WatchlistModule],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'user228',
+      database: 'examproga',
+      autoLoadEntities: true,
+      synchronize: true, // Только для разработки!
+    }),
+    UsersModule,
+    TitlesModule,
+    EpisodesModule,
+    RatingsModule,
+    WatchlistModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

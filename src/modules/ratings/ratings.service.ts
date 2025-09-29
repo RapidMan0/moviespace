@@ -1,46 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Rating } from './entities/rating.entity';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
-import { Rating } from './entities/rating.entity';
 
 @Injectable()
 export class RatingsService {
-  private ratings: Rating[] = [];
-  private id = 1;
+  constructor(
+    @InjectRepository(Rating)
+    private ratingsRepository: Repository<Rating>,
+  ) {}
 
-  create(createRatingDto: CreateRatingDto): Rating {
-    // Один рейтинг на пользователя и title
-    if (this.ratings.find(r => r.user_id === createRatingDto.user_id && r.title_id === createRatingDto.title_id)) {
-      throw new Error('User already rated this title');
-    }
-    const rating: Rating = {
-      id: this.id++,
+  async create(createRatingDto: CreateRatingDto): Promise<Rating> {
+    const rating = this.ratingsRepository.create({
       ...createRatingDto,
       created_at: new Date(),
-    };
-    this.ratings.push(rating);
-    return rating;
+    });
+    return this.ratingsRepository.save(rating);
   }
 
-  findAll(): Rating[] {
-    return this.ratings;
+  async findAll(): Promise<Rating[]> {
+    return this.ratingsRepository.find();
   }
 
-  findOne(id: number): Rating | undefined {
-    return this.ratings.find(r => r.id === id);
+  async findOne(id: number): Promise<Rating | null> {
+    return this.ratingsRepository.findOneBy({ id });
   }
 
-  update(id: number, updateRatingDto: UpdateRatingDto): Rating | undefined {
-    const rating = this.findOne(id);
-    if (!rating) return undefined;
-    Object.assign(rating, updateRatingDto);
-    return rating;
+  async update(id: number, updateRatingDto: UpdateRatingDto): Promise<Rating | null> {
+    await this.ratingsRepository.update(id, updateRatingDto);
+    return this.findOne(id);
   }
 
-  remove(id: number): boolean {
-    const idx = this.ratings.findIndex(r => r.id === id);
-    if (idx === -1) return false;
-    this.ratings.splice(idx, 1);
-    return true;
+  async remove(id: number): Promise<boolean> {
+    const result = await this.ratingsRepository.delete(id);
+    return result.affected === 1;
   }
 }

@@ -1,43 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Watchlist } from './entities/watchlist.entity';
 import { CreateWatchlistDto } from './dto/create-watchlist.dto';
 import { UpdateWatchlistDto } from './dto/update-watchlist.dto';
-import { Watchlist } from './entities/watchlist.entity';
 
 @Injectable()
 export class WatchlistService {
-  private watchlist: Watchlist[] = [];
+  constructor(
+    @InjectRepository(Watchlist)
+    private watchlistRepository: Repository<Watchlist>,
+  ) {}
 
-  create(createWatchlistDto: CreateWatchlistDto): Watchlist {
-    // Один title в watchlist пользователя
-    if (this.watchlist.find(w => w.user_id === createWatchlistDto.user_id && w.title_id === createWatchlistDto.title_id)) {
-      throw new Error('Title already in watchlist');
-    }
-    const item: Watchlist = {
+  async create(createWatchlistDto: CreateWatchlistDto): Promise<Watchlist> {
+    const item = this.watchlistRepository.create({
       ...createWatchlistDto,
       created_at: new Date(),
-    };
-    this.watchlist.push(item);
-    return item;
+    });
+    return this.watchlistRepository.save(item);
   }
 
-  findAll(): Watchlist[] {
-    return this.watchlist;
+  async findAll(): Promise<Watchlist[]> {
+    return this.watchlistRepository.find();
   }
 
-  findOne(id: number): Watchlist | undefined {
-    // id не используется, можно искать по user_id и title_id
-    return this.watchlist[id];
+  async findOne(user_id: number, title_id: number): Promise<Watchlist | null> {
+    return this.watchlistRepository.findOneBy({ user_id, title_id });
   }
 
-  update(id: number, updateWatchlistDto: UpdateWatchlistDto): Watchlist | undefined {
-    // id не используется, обычно обновлять нечего
-    return undefined;
+  async update(user_id: number, title_id: number, updateWatchlistDto: UpdateWatchlistDto): Promise<Watchlist | null> {
+    await this.watchlistRepository.update({ user_id, title_id }, updateWatchlistDto);
+    return this.findOne(user_id, title_id);
   }
 
-  remove(id: number): boolean {
-    // id не используется, удалять по user_id и title_id
-    if (id < 0 || id >= this.watchlist.length) return false;
-    this.watchlist.splice(id, 1);
-    return true;
+  async remove(user_id: number, title_id: number): Promise<boolean> {
+    const result = await this.watchlistRepository.delete({ user_id, title_id });
+    return result.affected === 1;
   }
 }

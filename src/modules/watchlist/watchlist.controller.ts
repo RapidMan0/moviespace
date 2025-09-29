@@ -24,24 +24,28 @@ export class WatchlistController {
     return this.watchlistService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get watchlist item by id' })
+  @Get(':user_id/:title_id')
+  @ApiOperation({ summary: 'Get watchlist item by user and title' })
   @ApiResponse({ status: 200, type: Watchlist })
-  findOne(@Param('id') id: string) {
-    return this.watchlistService.findOne(+id);
+  findOne(@Param('user_id') user_id: string, @Param('title_id') title_id: string) {
+    return this.watchlistService.findOne(+user_id, +title_id);
   }
 
-  @Patch(':id')
+  @Patch(':user_id/:title_id')
   @ApiOperation({ summary: 'Update watchlist item' })
   @ApiResponse({ status: 200, type: Watchlist })
-  update(@Param('id') id: string, @Body() updateWatchlistDto: UpdateWatchlistDto) {
-    return this.watchlistService.update(+id, updateWatchlistDto);
+  update(
+    @Param('user_id') user_id: string,
+    @Param('title_id') title_id: string,
+    @Body() updateWatchlistDto: UpdateWatchlistDto,
+  ) {
+    return this.watchlistService.update(+user_id, +title_id, updateWatchlistDto);
   }
 
-  @Delete(':id')
+  @Delete(':user_id/:title_id')
   @ApiOperation({ summary: 'Remove from watchlist' })
   @ApiResponse({ status: 200 })
-  remove(@Param('id') id: string) {
-    return this.watchlistService.remove(+id);
+  remove(@Param('user_id') user_id: string, @Param('title_id') title_id: string) {
+    return this.watchlistService.remove(+user_id, +title_id);
   }
 }
