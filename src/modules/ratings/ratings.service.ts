@@ -10,7 +10,7 @@ export class RatingsService {
   constructor(
     @InjectRepository(Rating)
     private ratingsRepository: Repository<Rating>,
-  ) {}
+  ) { }
 
   async create(createRatingDto: CreateRatingDto): Promise<Rating> {
     const rating = this.ratingsRepository.create({

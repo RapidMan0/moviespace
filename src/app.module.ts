@@ -7,6 +7,7 @@ import { TitlesModule } from './modules/titles/titles.module';
 import { EpisodesModule } from './modules/episodes/episodes.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
 import { WatchlistModule } from './modules/watchlist/watchlist.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { WatchlistModule } from './modules/watchlist/watchlist.module';
     EpisodesModule,
     RatingsModule,
     WatchlistModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
