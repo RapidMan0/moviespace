@@ -8,6 +8,6 @@ export class SignInDto {
   email: string;
 
   @ApiProperty()
-  @IsNotEmpty({ message: 'Фильм или сериал обязателен.' })
+  @IsNotEmpty({ message: 'Пароль обязателен' })
   password: string;
 }
