@@ -13,22 +13,28 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({ status: 201, type: User })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.create(createUserDto);
+    const { password, ...result } = user; // убираем пароль
+    return result;
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, type: [User] })
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    const users = await this.usersService.findAll();
+    return users.map(({ password, ...rest }) => rest); // убираем пароль
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({ status: 200, type: User })
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findOne(+id);
+    if (!user) return null;
+    const { password, ...result } = user; // убираем пароль
+    return result;
   }
 
   @Patch(':id')
@@ -41,7 +47,12 @@ export class UsersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user' })
   @ApiResponse({ status: 200 })
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const success = await this.usersService.remove(+id);
+    if (success) {
+      return { message: `Пользователь с id ${id} успешно удалён.` };
+    } else {
+      return { message: `Пользователь с id ${id} не найден.` };
+    }
   }
 }

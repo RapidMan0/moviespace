@@ -8,6 +8,7 @@ import { EpisodesModule } from './modules/episodes/episodes.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
 import { WatchlistModule } from './modules/watchlist/watchlist.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AuthModule } from './modules/auth/auth.module';
     RatingsModule,
     WatchlistModule,
     AuthModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
