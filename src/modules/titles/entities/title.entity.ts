@@ -37,7 +37,7 @@ export class Title {
 
   @ApiProperty({ required: false })
   @Column({ type: 'float', nullable: true })
-  popularity?: number;
+  popularity?: number | null;
 
   @ApiProperty({ required: false })
   @Column({ type: 'int', nullable: true })
