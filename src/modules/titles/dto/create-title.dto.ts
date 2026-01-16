@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsInt, Min, Max, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
 
 export class CreateTitleDto {
   @ApiProperty({ enum: ['MOVIE', 'SERIAL'] })
@@ -37,11 +37,6 @@ export class CreateTitleDto {
   @IsOptional()
   @IsString({ message: 'Жанры должны быть строкой.' })
   genres?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNumber({}, { message: 'Популярность должна быть числом.' })
-  popularity?: number;
 
   @ApiProperty({ required: false })
   @IsOptional()

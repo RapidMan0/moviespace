@@ -15,6 +15,7 @@ export class TitlesService {
   async create(createTitleDto: CreateTitleDto): Promise<Title> {
     const title = this.titlesRepository.create({
       ...createTitleDto,
+      popularity: 0, // всегда 0 при создании
       created_at: new Date(),
     });
     return this.titlesRepository.save(title);

@@ -1,9 +1,8 @@
-import { Controller, Get, Param, Query, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiParam,
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
@@ -27,7 +26,9 @@ export class RecommendationsController {
   @Get()
   @UseGuards(AuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Personalized recommendations for authenticated user' })
+  @ApiOperation({
+    summary: 'Personalized recommendations for authenticated user',
+  })
   @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({ status: 200, type: [Title] })
   recommendations(@Request() req, @Query('limit') limit = '10') {
