@@ -11,32 +11,32 @@ export class RecommendationsService {
     @InjectRepository(Title) private titlesRepo: Repository<Title>,
     @InjectRepository(Rating) private ratingsRepo: Repository<Rating>,
     @InjectRepository(Watchlist) private watchlistRepo: Repository<Watchlist>,
-  ) {}
+  ) {} //injectarea repositoriilor TypeORM pentru a lucra cu bazele de date
 
   async getTrending(limit = 10) {
-    const rows: Array<{ title_id: number }> = await this.ratingsRepo.query(
+    const rows: Array<{ title_id: number; cnt: number }> = await this.ratingsRepo.query(
       `SELECT title_id, COUNT(*) as cnt
        FROM "rating"
        WHERE created_at > NOW() - INTERVAL '7 days'
        GROUP BY title_id
-       ORDER BY cnt DESC
+       ORDER BY cnt DESC, title_id ASC
        LIMIT $1`, [limit],
-    );
-    const ids = rows.map(r => r.title_id);
-    if (!ids.length) return [];
+    ); // se selectează titlurile la care s-au dat cele mai multe ratinguri în ultimele 7 zile, cu sortare secundară după ID
+    const ids = rows.map(r => r.title_id); //are loc extragerea ID-urilor titlurilor din rezultatele interogării
+    if (!ids.length) return []; //dacă nu există ID-uri, se returnează un array gol
     const titles = await this.titlesRepo.find({ where: { id: In(ids) } });
     const byId = new Map(titles.map(t => [t.id, t]));
-    return ids.map(id => byId.get(id)).filter(Boolean);
+    return rows.map(r => ({ title: byId.get(r.title_id), ratingCount: r.cnt })).filter(r => r.title); //se mapează rezultatele pentru a include obiectele titlu corespunzătoare și se filtrează orice intrare fără titlu valid
   }
 
   async getRecommendations(userId: number, limit = 10) {
-    const userRatings = await this.ratingsRepo.find({ where: { user_id: userId }, take: 50 });
-    const ratedIds = userRatings.map(r => r.title_id);
-    const watchlist = await this.watchlistRepo.find({ where: { user_id: userId } });
+    const userRatings = await this.ratingsRepo.find({ where: { user_id: userId }, take: 50 });// preia ultimele 50 de ratinguri ale utilizatorului
+    const ratedIds = userRatings.map(r => r.title_id); // extrage ID-urile titlurilor evaluate de utilizator
+    const watchlist = await this.watchlistRepo.find({ where: { user_id: userId } }); // preia lista de urmărire a utilizatorului
     const watchedIds = watchlist.map(w => w.title_id);
     const excluded = Array.from(new Set([...ratedIds, ...watchedIds]));
 
-    const seedTitles = ratedIds.length ? await this.titlesRepo.find({ where: { id: In(ratedIds) } }) : [];
+    const seedTitles = ratedIds.length ? await this.titlesRepo.find({ where: { id: In(ratedIds) } }) : []; //seed inseamna titlurile pe baza carora se vor face recomandari
     const genreCount: Record<string, number> = {};
     seedTitles.forEach(t => {
       if (!t.genres) return;
